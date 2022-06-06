@@ -1,0 +1,109 @@
+> db.people.insertMany([{"firstname" : "Callum", "surname" : "Young", "age" : 25, "height" : 168, "hobbies" :["books", "games"] }  {"firstname" : "Tim", "surname" : "Bear", "age" : 27, "height" : 178, "hobbies" :["mischief", "games"] } {"firstname" : "Tom", "surname" : "Smith", "age" : 28, "height" : 182, "hobbies" :["food", "games"] } {"firstname" : "Andrew", "surename" : "Walker", "age" : 26, "height" : 182, "hobbies" :["chips", "games"]}])
+uncaught exception: SyntaxError: missing ] after element list :
+@(shell):1:129
+> db.people.insertMany([{"firstname" : "Callum",
+... "surname" : "Young",
+... "age" : 25,
+... "height" : 168,
+... "hobbies" :["books", "games"]
+... },
+... {"firstname" : "Tim",
+... "surname" : "Bear",
+... "age" : 27,
+... "height" : 178,
+... "hobbies" :["mischief", "games"]
+... },
+... {"firstname" : "Tom",
+... "surname" : "Smith",
+... "age" : 28,
+... "height" : 182,
+... "hobbies" :["food", "games"]
+... },
+... {"firstname" : "Andrew",
+... "surename" : "Walker",
+... "age" : 26,
+... "height" : 182,
+... "hobbies" :["chips", "games"]}])
+{
+        "acknowledged" : true,
+        "insertedIds" : [
+                ObjectId("629ddad64e4526bf8c995872"),
+                ObjectId("629ddad64e4526bf8c995873"),
+                ObjectId("629ddad64e4526bf8c995874"),
+                ObjectId("629ddad64e4526bf8c995875")
+        ]
+}
+> db.people.updateOne("firstname": "Andrew"},{"$set": {"hobbies": "roulette"
+uncaught exception: SyntaxError: missing ) after argument list :
+@(shell):1:31
+> db.people.updateOne("firstname": "Andrew"},{"$set": {"hobbies": "roulette"}})
+uncaught exception: SyntaxError: missing ) after argument list :
+@(shell):1:31
+> db.people.updateOne({"firstname": "Andrew"},{"$set": {"hobbies": "roulette"}})
+{ "acknowledged" : true, "matchedCount" : 1, "modifiedCount" : 1 }
+> db.people.find
+function(query, fields, limit, skip, batchSize, options) {
+    var cursor = new DBQuery(this._mongo,
+                             this._db,
+                             this,
+                             this._fullName,
+                             this._massageObject(query),
+                             fields,
+                             limit,
+                             skip,
+                             batchSize,
+                             options || this.getQueryOptions());
+
+    {
+        const session = this.getDB().getSession();
+
+        const readPreference = session._getSessionAwareClient().getReadPreference(session);
+        if (readPreference !== null) {
+            cursor.readPref(readPreference.mode, readPreference.tags);
+        }
+
+        const client = session._getSessionAwareClient();
+        const readConcern = client.getReadConcern(session);
+        if (readConcern !== null &&
+            client.canUseReadConcern(session, cursor._convertToCommand(true))) {
+            cursor.readConcern(readConcern.level);
+        }
+    }
+
+    return cursor;
+}
+> db.people.find()
+{ "_id" : ObjectId("629ddad64e4526bf8c995872"), "firstname" : "Callum", "surname" : "Young", "age" : 25, "height" : 168, "hobbies" : [ "books", "games" ] }
+{ "_id" : ObjectId("629ddad64e4526bf8c995873"), "firstname" : "Tim", "surname" : "Bear", "age" : 27, "height" : 178, "hobbies" : [ "mischief", "games" ] }
+{ "_id" : ObjectId("629ddad64e4526bf8c995874"), "firstname" : "Tom", "surname" : "Smith", "age" : 28, "height" : 182, "hobbies" : [ "food", "games" ] }
+{ "_id" : ObjectId("629ddad64e4526bf8c995875"), "firstname" : "Andrew", "surename" : "Walker", "age" : 26, "height" : 182, "hobbies" : "roulette" }
+> db.people.updateOne({"firstname": "Tom"},{"$pull": {"hobbies": "food"}})
+{ "acknowledged" : true, "matchedCount" : 1, "modifiedCount" : 1 }
+> db.people.find()
+{ "_id" : ObjectId("629ddad64e4526bf8c995872"), "firstname" : "Callum", "surname" : "Young", "age" : 25, "height" : 168, "hobbies" : [ "books", "games" ] }
+{ "_id" : ObjectId("629ddad64e4526bf8c995873"), "firstname" : "Tim", "surname" : "Bear", "age" : 27, "height" : 178, "hobbies" : [ "mischief", "games" ] }
+{ "_id" : ObjectId("629ddad64e4526bf8c995874"), "firstname" : "Tom", "surname" : "Smith", "age" : 28, "height" : 182, "hobbies" : [ "games" ] }
+{ "_id" : ObjectId("629ddad64e4526bf8c995875"), "firstname" : "Andrew", "surename" : "Walker", "age" : 26, "height" : 182, "hobbies" : "roulette" }
+> db.people.find({"age": {"$gte": 50}})
+> db.people.find({"age": {"$lte":30}})
+{ "_id" : ObjectId("629ddad64e4526bf8c995872"), "firstname" : "Callum", "surname" : "Young", "age" : 25, "height" : 168, "hobbies" : [ "books", "games" ] }
+{ "_id" : ObjectId("629ddad64e4526bf8c995873"), "firstname" : "Tim", "surname" : "Bear", "age" : 27, "height" : 178, "hobbies" : [ "mischief", "games" ] }
+{ "_id" : ObjectId("629ddad64e4526bf8c995874"), "firstname" : "Tom", "surname" : "Smith", "age" : 28, "height" : 182, "hobbies" : [ "games" ] }
+{ "_id" : ObjectId("629ddad64e4526bf8c995875"), "firstname" : "Andrew", "surename" : "Walker", "age" : 26, "height" : 182, "hobbies" : "roulette" }
+> db.people.find({"age": {"$lte":30},{"_id": false,"firstname": true,"lastname": true}})
+uncaught exception: SyntaxError: expected property name, got '{' :
+@(shell):1:35
+> db.people.find({"age": {"$lte":30}},{"_id": false,"firstname": true,"lastname": true})
+{ "firstname" : "Callum" }
+{ "firstname" : "Tim" }
+{ "firstname" : "Tom" }
+{ "firstname" : "Andrew" }
+> db.people,updateOne({"firstname": "callum"},{"$set": {"pet":{"name": "jade","age": 11,"species": "dog"}}})
+uncaught exception: ReferenceError: updateOne is not defined :
+@(shell):1:11
+> db.people,updateOne({"firstname": "Callum"},{"$set": {"pet":{"name": "jade","age": 11,"species": "dog"}}})
+uncaught exception: ReferenceError: updateOne is not defined :
+@(shell):1:11
+> db.people.updateOne({"firstname": "Callum"},{"$set": {"pet":{"name": "jade","age": 11,"species": "dog"}}})
+{ "acknowledged" : true, "matchedCount" : 1, "modifiedCount" : 1 }
+>
