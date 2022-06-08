@@ -1,50 +1,44 @@
-// axios.get("https://raw.githubusercontent.com/ewomackQA/JSONDataRepo/master/example.json")
-//     .then(response => {console.log(response.data);
-//     document.write(JSON.stringify(response.data, null, 2))
-//         document.getElementById('output').innerText = JSON.stringify(response.data, null, 2);
-//      }) .catch(err => console.log(err))
+const express = require("express");
+const app = express();
+app.use (express.json());
 
-const output= document.getElementById('output');
+app.get("/hello", (req, res) => console.log("hello my name is ..."));
 
-axios.get("https://raw.githubusercontent.com/ewomackQA/JSONDataRepo/master/example.json")
-    .then(response => {
-        const heroes = response.data;
-        console.log("HEROES: ", heroes);
+let names = ["cy", "mb", "tp", "ns"];
+app.get("/getAll", (req, res) => res.send(names));
 
-        const squadName = document.createElement("h1");
-        squadName.innerText = heroes.squadName;
-        output.appendChild(squadName);
+app.get('/read/:id', (req, res, next) => {
+  const id= parseInt(req.params.id); 
+  if (Number.isNaN(id) || id < 0 || id >= names.length) return next({ status: 400, message: 'Invalid id' })
+  return res.send(names[id]);
+});
 
-        const secretBase = document.createElement("p");
-        secretBase.innerText = "Secret base: " + heroes.secretBase;
-        output.appendChild(secretBase);
+app.post('/create', (req, res) => {
+  const newName = req.body.name;
+  names.push(newName);
+  res.status(201).send(`Successfully added ${names[names.length - 1]}`);
+});
 
-        const homeTown = document.createElement("p");
-        homeTown.innerText = "Hometown: " + heroes.homeTown;
-        output.appendChild(homeTown);
+app.put('/update/:id', (req, res, next) => {
+  const id = parseInt(req.params.id, 10);
+  const newName = req.query.name;
+  if (Number.isNaN(id) || id < 0 || id >= names.length) return next({ status: 400, message: 'Invalid id' });
+  const oldName = names[id];
+  names.splice(id, 1, newName);
+  return res.send(`Replaced ${oldName} with ${names[id]}`);
+});
 
-        const formed = document.createElement("p");
-        formed.innerText = "Formed: " + heroes.formed;
-        output.appendChild(formed);
+app.delete('/remove/:id', (req, res, next) => {
+  const id = parseInt(req.params.id, 10);
+  if (Number.isNaN(id) || id < 0 || id >= names.length) return next({ status: 400, message: 'Invalid id' });
+  names.splice(id, 1);
+  return res.status(204).send();
+});
 
+app.get('/getError', (req,res,next) =>{
+  next(Error('error message'))
+});
 
-        for (let member of heroes.members) {
-            console.log("MEMBER: ", member);
-            const memberSection = document.createElement("section");
-
-            const memberName = document.createElement("h2");
-            memberName.innerText = member.name;
-            memberSection.appendChild(memberName);
-
-            const powers = document.createElement("ul");
-
-            for (let power of member.powers) {
-                const p = document.createElement("li");
-                p.innerText = power;
-                powers.appendChild(p);
-            }
-
-            memberSection.appendChild(powers);
-
-            output.appendChild(memberSection);
-        }})
+const server = app.listen(4494, () => {
+  console.log(`Server started sucessfully ${server.address().port}`);
+});
